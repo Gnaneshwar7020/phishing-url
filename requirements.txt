@@ -6,3 +6,4 @@ tldextract==3.4.4
 nltk==3.8.1
 gunicorn
 flask_cors
+pandas
