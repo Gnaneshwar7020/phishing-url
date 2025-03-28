@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phishing Detection</title>
+    <style>
+        /* General Styles */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --text-dark: #111827;
+            --text-medium: #4b5563;
+            --text-light: #6b7280;
+            --bg-light: #f9fafb;
+            --bg-white: #ffffff;
+            --border-light: #e5e7eb;
+            --success: #10b981;
+            --error: #ef4444;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-light);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 1px 1px, #e0e0e0 1px, transparent 0),
+                radial-gradient(circle at 1px 1px, #e0e0e0 1px, transparent 0);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+            color: var(--text-dark);
+        }
+
+        .container {
+            background: var(--bg-white);
+            padding: 40px;
+            border-radius: 16px;
+            width: 800px;
+            max-width: 95%;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            transform: translateY(-20px);
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            border: 1px solid var(--border-light);
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Typography */
+        h1 {
+            font-size: clamp(24px, 5vw, 32px);
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 10px;
+            color: var(--text-dark);
+            background: linear-gradient(90deg, var(--primary-color), #4f46e5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
+
+        h2 {
+            font-size: clamp(18px, 4vw, 24px);
+            font-weight: 700;
+            margin: 20px 0 15px;
+            color: var(--text-dark);
+            position: relative;
+            display: inline-block;
+        }
+        
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: var(--primary-color);
+            border-radius: 3px;
+        }
+
+        p {
+            font-size: 16px;
+            font-weight: 400;
+            margin: 10px 0;
+            color: var(--text-medium);
+            line-height: 1.6;
+        }
+
+        .student-info {
+            margin: 30px auto;
+            max-width: 80%;
+            padding: 20px;
+            border-radius: 12px;
+            background: rgba(37, 99, 235, 0.05);
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .student-info::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary-color);
+            animation: pulseHighlight 2s infinite;
+        }
+        
+        @keyframes pulseHighlight {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        
+        .student-info p {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin: 5px 0;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInStaggered 0.5s ease-out forwards;
+        }
+        
+        .student-info p:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        @keyframes fadeInStaggered {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .session-info {
+            margin: 20px 0 30px;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-light);
+            padding: 10px;
+            border-top: 1px dashed var(--border-light);
+            border-bottom: 1px dashed var(--border-light);
+        }
+
+        /* Form Styles */
+        form {
+            margin: 25px 0;
+            padding: 25px;
+            border-radius: 12px;
+            background: var(--bg-light);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+        
+        form:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 16px;
+        }
+
+        input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 14px 16px;
+            margin: 10px 0 20px;
+            border: 2px solid var(--border-light);
+            border-radius: 10px;
+            background: var(--bg-white);
+            font-size: 16px;
+            transition: var(--transition);
+            color: var(--text-dark);
+        }
+
+        input[type="text"]:focus, input[type="file"]:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+            outline: none;
+        }
+        
+        input[type="file"] {
+            padding: 10px;
+            cursor: pointer;
+        }
+        
+        input[type="file"]::file-selector-button {
+            padding: 8px 16px;
+            border-radius: 6px;
+            background-color: var(--bg-white);
+            border: 1px solid var(--border-light);
+            color: var(--text-dark);
+            margin-right: 16px;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        
+        input[type="file"]::file-selector-button:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Buttons */
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            margin: 10px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+        
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(100, 100);
+                opacity: 0;
+            }
+        }
+        
+        button:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        button:active {
+            transform: translateY(1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 30px;
+            background: var(--bg-white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+        }
+
+        table th, table td {
+            border: 1px solid var(--border-light);
+            padding: 16px;
+            text-align: left;
+            font-size: 15px;
+        }
+        
+        table th {
+            background-color: rgba(37, 99, 235, 0.05);
+            font-weight: 600;
+            color: var(--text-dark);
+            position: relative;
+        }
+        
+        table th:first-child {
+            border-top-left-radius: 12px;
+        }
+        
+        table th:last-child {
+            border-top-right-radius: 12px;
+        }
+        
+        table tr:last-child td:first-child {
+            border-bottom-left-radius: 12px;
+        }
+        
+        table tr:last-child td:last-child {
+            border-bottom-right-radius: 12px;
+        }
+
+        .success {
+            color: var(--success);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        .success::before {
+            content: '✓';
+            display: inline-block;
+            font-size: 18px;
+        }
+
+        .error {
+            color: var(--error);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        .error::before {
+            content: '✕';
+            display: inline-block;
+            font-size: 18px;
+        }
+
+        tr.fade-in {
+            opacity: 0;
+            animation: fadeInRow 0.5s ease-in-out forwards;
+        }
+        
+        tr.fade-in:nth-child(2) { animation-delay: 0.1s; }
+        tr.fade-in:nth-child(3) { animation-delay: 0.2s; }
+        tr.fade-in:nth-child(4) { animation-delay: 0.3s; }
+        tr.fade-in:nth-child(5) { animation-delay: 0.4s; }
+        tr.fade-in:nth-child(n+6) { animation-delay: 0.5s; }
+
+        @keyframes fadeInRow {
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Download Link */
+        a.download {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 14px 28px;
+            background-color: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: var(--transition);
+            transform: translateY(20px);
+            opacity: 0;
+            animation: fadeInUp 0.5s ease-out 0.5s forwards;
+            box-shadow: var(--shadow-sm);
+        }
+
+        a.download:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        a.download:active {
+            transform: translateY(1px);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            .student-info {
+                max-width: 100%;
+            }
+            
+            table th, table td {
+                padding: 12px 10px;
+                font-size: 14px;
+            }
+        }
+        
+        /* Loading animation for buttons */
+        .loading {
+            position: relative;
+            pointer-events: none;
+        }
+        
+        .loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin-top: -10px;
+            margin-left: -10px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <h1>Department of Information Technology</h1>
+        <h1>National Institute of Technology Karnataka, Surathkal-575025</h1>
+        
+        <h2>Information Assurance and Security (IT352) Course Project</h2>
+        
+        <h1>Phishing URL Detection Using RESMLP</h1>
+        
+        <!-- Student Information -->
+        <p>Carried out by</p>
+        <div class="student-info">
+            <p>Gnaneshwar Kandula (221IT035)</p>
+            <p>Harshini Alapati (221IT006)</p>
+        </div>
+        
+        <!-- Session Information -->
+        <div class="session-info">
+            <p>During Academic Session January – April 2025</p>
+        </div>
+
+        <!-- Form for Single URL Input -->
+        <form action="/classify" method="post" id="singleUrlForm">
+            <label for="url">Enter URL:</label>
+            <input type="text" id="url" name="url" placeholder="https://example.com" required>
+            <button type="submit" id="singleUrlBtn">Classify Input</button>
+        </form>
+
+        <!-- Form for Batch File Upload -->
+        <form action="/predict_batch" method="post" enctype="multipart/form-data" id="batchUrlForm">
+            <label for="file">Upload URLs (.txt or .csv):</label>
+            <input type="file" id="file" name="file" accept=".txt,.csv" required>
+            <button type="submit" id="batchUrlBtn">Press Here to Display Output on Screen</button>
+        </form>
+
+        <!-- Display Batch Results if Available -->
+        {% if batch_results %}
+        <h2>Batch Results:</h2>
+        <table>
+            <tr>
+                <th>URL</th>
+                <th>Status</th>
+            </tr>
+            {% for url, result in batch_results.items() %}
+            <tr class="fade-in">
+                <td>{{ url }}</td>
+                <td class="{% if result == 'Legitimate' %}success{% else %}error{% endif %}">
+                    {{ result }}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        <a href="/download_results" class="download">Download Results as CSV</a>
+        {% endif %}
+
+        <!-- Display Error if Any -->
+        {% if error %}
+        <p class="error">{{ error }}</p>
+        {% endif %}
+    </div>
+
+    <script>
+        // Add loading state to buttons when forms are submitted
+        document.getElementById('singleUrlForm').addEventListener('submit', function() {
+            document.getElementById('singleUrlBtn').classList.add('loading');
+            document.getElementById('singleUrlBtn').textContent = 'Processing...';
+        });
+        
+        document.getElementById('batchUrlForm').addEventListener('submit', function() {
+            document.getElementById('batchUrlBtn').classList.add('loading');
+            document.getElementById('batchUrlBtn').textContent = 'Processing...';
+        });
+        
+        // Enhance form inputs with focus effects
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.style.transform = 'translateY(-2px)';
+            });
+            
+            input.addEventListener('blur', () => {
+                input.parentElement.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classification Result</title>
+    <style>
+        /* Import professional font */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        /* CSS Variables for consistent styling */
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --text-dark: #111827;
+            --text-medium: #4b5563;
+            --text-light: #6b7280;
+            --bg-light: #f9fafb;
+            --bg-white: #ffffff;
+            --border-light: #e5e7eb;
+            --success: #10b981;
+            --error: #ef4444;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-light);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-dark);
+            background-image: 
+                radial-gradient(circle at 1px 1px, #e0e0e0 1px, transparent 0),
+                radial-gradient(circle at 1px 1px, #e0e0e0 1px, transparent 0);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .container {
+            background: var(--bg-white);
+            padding: 40px;
+            border-radius: 16px;
+            width: 800px;
+            max-width: 95%;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-light);
+            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        /* Typography */
+        h1 {
+            font-size: clamp(22px, 4vw, 28px);
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 10px;
+            color: var(--text-dark);
+            background: linear-gradient(90deg, var(--primary-color), #4f46e5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
+        
+        h2 {
+            font-size: clamp(16px, 3vw, 20px);
+            font-weight: 700;
+            margin: 20px 0 15px;
+            color: var(--text-dark);
+            position: relative;
+            display: inline-block;
+        }
+        
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: var(--primary-color);
+            border-radius: 3px;
+        }
+        
+        h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 20px 0 15px;
+            color: var(--text-dark);
+            position: relative;
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+        
+        h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 2px;
+            background: var(--primary-color);
+            border-radius: 2px;
+        }
+        
+        p {
+            font-size: 16px;
+            font-weight: 400;
+            margin: 10px 0;
+            color: var(--text-medium);
+            line-height: 1.6;
+        }
+        
+        .dotted-line {
+            border-bottom: 1px dashed var(--border-light);
+            display: inline-block;
+            width: 300px;
+            margin: 10px 0;
+        }
+        
+        .student-info {
+            margin: 30px auto;
+            max-width: 80%;
+            padding: 20px;
+            border-radius: 12px;
+            background: rgba(37, 99, 235, 0.05);
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .student-info::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary-color);
+            animation: pulseHighlight 2s infinite;
+        }
+        
+        @keyframes pulseHighlight {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        
+        .student-info p {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin: 5px 0;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInStaggered 0.5s ease-out forwards;
+        }
+        
+        .student-info p:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        @keyframes fadeInStaggered {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .session-info {
+            margin: 20px 0 30px;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-light);
+            padding: 10px;
+            border-top: 1px dashed var(--border-light);
+            border-bottom: 1px dashed var(--border-light);
+        }
+        
+        /* Result Styles */
+        .result-container {
+            margin: 25px 0;
+            padding: 25px;
+            border-radius: 12px;
+            background: var(--bg-light);
+            box-shadow: var(--shadow-sm);
+            animation: fadeIn 0.8s ease-out 0.3s both;
+        }
+        
+        .success {
+            color: var(--success);
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .success::before {
+            content: '✓';
+            display: inline-block;
+            font-size: 18px;
+        }
+        
+        .error {
+            color: var(--error);
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .error::before {
+            content: '✕';
+            display: inline-block;
+            font-size: 18px;
+        }
+        
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 25px 0;
+            background: var(--bg-white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+        }
+        
+        table th, table td {
+            border: 1px solid var(--border-light);
+            padding: 16px;
+            text-align: left;
+            font-size: 15px;
+        }
+        
+        table th {
+            background-color: rgba(37, 99, 235, 0.05);
+            font-weight: 600;
+            color: var(--text-dark);
+            position: relative;
+        }
+        
+        table th:first-child {
+            border-top-left-radius: 12px;
+        }
+        
+        table th:last-child {
+            border-top-right-radius: 12px;
+        }
+        
+        table tr:last-child td:first-child {
+            border-bottom-left-radius: 12px;
+        }
+        
+        table tr:last-child td:last-child {
+            border-bottom-right-radius: 12px;
+        }
+        
+        table tr {
+            opacity: 0;
+            animation: fadeInRow 0.5s ease-in-out forwards;
+        }
+        
+        table tr:nth-child(2) { animation-delay: 0.1s; }
+        table tr:nth-child(3) { animation-delay: 0.2s; }
+        table tr:nth-child(4) { animation-delay: 0.3s; }
+        table tr:nth-child(5) { animation-delay: 0.4s; }
+        table tr:nth-child(n+6) { animation-delay: 0.5s; }
+        
+        @keyframes fadeInRow {
+            to {
+                opacity: 1;
+            }
+        }
+        
+        /* Button and Link Styles */
+        a {
+            display: inline-block;
+            margin: 15px 5px;
+            padding: 14px 28px;
+            background-color: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        a:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        a:active {
+            transform: translateY(1px);
+        }
+        
+        /* List Styles */
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 15px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        li {
+            font-size: 15px;
+            padding: 8px 12px;
+            background-color: var(--bg-light);
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            transition: var(--transition);
+        }
+        
+        li:hover {
+            transform: translateX(5px);
+            background-color: rgba(37, 99, 235, 0.05);
+        }
+        
+        /* Probability Bar */
+        .probability-bar {
+            height: 8px;
+            width: 100%;
+            background-color: var(--border-light);
+            border-radius: 4px;
+            margin-top: 5px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .probability-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 1s ease-out;
+        }
+        
+        .legitimate-fill {
+            background-color: var(--success);
+        }
+        
+        .phishing-fill {
+            background-color: var(--error);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            .student-info {
+                max-width: 100%;
+            }
+            
+            table th, table td {
+                padding: 12px 10px;
+                font-size: 14px;
+            }
+            
+            a {
+                padding: 12px 20px;
+                font-size: 15px;
+                display: block;
+                margin: 10px auto;
+                max-width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <h1>Department of Information Technology</h1>
+        <h1>National Institute of Technology Karnataka, Surathkal-575025</h1>
+        
+        <h2>Information Assurance and Security (IT352) Course Project</h2>
+        
+        <h1>Phishing URL Detection Using RESMLP</h1>
+        
+        <!-- Student Information -->
+        <p>Carried out by</p>
+        <div class="student-info">
+            <p>Gnaneshwar Kandula (221IT035)</p>
+            <p>Harshini Alapati (221IT006)</p>
+        </div>
+        
+        <!-- Session Information -->
+        <div class="session-info">
+            <p>During Academic Session January – April 2025</p>
+        </div>
+
+        <h3>Classification Result</h3>
+
+        <!-- Error Message -->
+        {% if error %}
+        <p class="error">{{ error }}</p>
+        {% endif %}
+
+        <!-- Single URL Result -->
+        {% if url and prediction %}
+        <div class="result-container">
+            <h3>Result for: {{ url }}</h3>
+            <p><strong>Status:</strong> <span class="{% if prediction == 'Legitimate' %}success{% else %}error{% endif %}">{{ prediction }}</span></p>
+            
+            {% if probabilities %}
+            <p><strong>Probabilities:</strong></p>
+            <ul>
+                <li>
+                    <span>Legitimate:</span> 
+                    <span>{{ "%.2f"|format(probabilities[0]*100) }}%</span>
+                    <div class="probability-bar">
+                        <div class="probability-fill legitimate-fill" style="width: {{ probabilities[0]*100 }}%;"></div>
+                    </div>
+                </li>
+                <li>
+                    <span>Phishing:</span> 
+                    <span>{{ "%.2f"|format(probabilities[1]*100) }}%</span>
+                    <div class="probability-bar">
+                        <div class="probability-fill phishing-fill" style="width: {{ probabilities[1]*100 }}%;"></div>
+                    </div>
+                </li>
+            </ul>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Batch Results -->
+        {% if batch_results %}
+        <h3>Batch Results:</h3>
+        <table>
+            <tr>
+                <th>URL</th>
+                <th>Status</th>
+            </tr>
+            {% for url, result in batch_results.items() %}
+            <tr>
+                <td>{{ url }}</td>
+                <td class="{% if result == 'Legitimate' %}success{% else %}error{% endif %}">
+                    {{ result }}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        <a href="/download_results">Download Results as CSV</a>
+        {% endif %}
+
+        <!-- Go Back Link -->
+        <a href="/">Go Back</a>
+    </div>
+    
+    <script>
+        // Animate probability bars on load
+        document.addEventListener('DOMContentLoaded', function() {
+            const bars = document.querySelectorAll('.probability-fill');
+            bars.forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 300);
+            });
+        });
+    </script>
+</body>
+</html>
