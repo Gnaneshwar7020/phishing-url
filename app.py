@@ -327,4 +327,4 @@ def download_results():
         return render_template('result.html', error="No results file available for download", success=False)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5001)))
